@@ -9,11 +9,30 @@
 }
 
 .chart text {
-  fill: white;
+  fill: black;
   font: 10px sans-serif;
 }
+    
+.axis line {
+     fill: none;
+     stroke: black;
+     shape-rendering: crispEdges};
+    
+#happy {
+  color: blue;
+}
+    
+#extrovert {
+  color: pink;
+}
+    
+#balance {
+  color: green;
+}
+
 </style>
 
+    
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <script src="http://d3js.org/d3.v3.min.js"></script>
 
@@ -25,6 +44,8 @@
 // - happierThanAvg: "I am happier than the average MIT student."
 // - extroverted: "Are you extroverted?"
 // - workLifeBalance: "I strike a good balance between my personal life and work."
+/*LIST OF OBJECTS (DICCIONARY IN PYTHON) */
+//USUALLY GRAB DATA FROM BACKEND
 var mitPressureSurvey = [
 {dorm: 'Baker House', happierThanAvg: 49, extroverted: 44, workLifeBalance: 54},
 {dorm: 'Bexley Hall', happierThanAvg: 36, extroverted: 41, workLifeBalance: 38},
@@ -51,19 +72,164 @@ var mitPressureSurvey = [
 {dorm: 'Westgate', happierThanAvg: 43, extroverted: 30, workLifeBalance: 43}
 ]
 
-var width = 420
+
+// HORIZONTAL BAR GRAPH OF ALL DATA
+var width = 1400;
 var barHeight = 20;
 
 // utility function that maps [0 to 100] to [0, width]
 // draw this on the board as a map of two lines
 var scaleFunction = d3.scale.linear().domain([0, 100]).range([0, width]);
 
-
-// jQuery magic to run this code after your page loads
-$(function() {
-  // insert your code here
+    $(function() {
+        var chart = d3.select('#d3chart')
+                .attr("width", width)
+                .attr("height", 3 * barHeight * mitPressureSurvey.length);
+        
+        // g means a group element.. every g will be bound to one data row in the mitPressureSurvey 
+        // SPECIFICATION 
+        var binding = chart.selectAll('g').data(mitPressureSurvey);
+        
+        //MAKING NEW Gs (as many as pieces of data)
+        // i is index
+        var bar = binding.enter()
+               .append("g")
+               .attr("transform", function(d, i){
+                   return "translate(0, " + (i*3*barHeight) + ")";
+               })
+        
+        //-1 makes space between bars
+        bar.append("rect")
+           .attr("width", function(d) {return scaleFunction(d.happierThanAvg);})
+           .attr("height", barHeight-1)
+        
+        bar.append("rect")
+           .attr("transform", function(d, i){
+                   return "translate(0, " + (barHeight) + ")";
+            })
+           .attr("width", function(d) {return scaleFunction(d.extroverted);})
+           .attr("height", barHeight-1)
+           .style("fill", 'pink');
+        
+        bar.append("rect")
+           .attr("transform", function(d, i){
+                   return "translate(0, " + (barHeight*2) + ")";
+            })
+           .attr("width", function(d) {return scaleFunction(d.workLifeBalance);})
+           .attr("height", barHeight-3)
+           .style("fill", 'green');
+        
+        //x and y position the text (dorm names) in the bars
+        bar.append('text')
+        .attr('x', 3)
+        .attr('y', barHeight/2 + 3)
+        .text(function(d) {return d.dorm+ "'s percentage of respondents happier than average";});
+        
+        //x and y position the text (dorm names) in the bars
+        bar.append('text')
+        .attr('x', 3)
+        .attr('y', 3*barHeight/2 + 3)
+        .text(function(d) {return d.dorm + "'s percentage of extroverted respondents";});
+        
+        //x and y position the text (dorm names) in the bars
+        bar.append('text')
+        .attr('x', 3)
+        .attr('y', 5*barHeight/2 + 2)
+        .text(function(d) {return d.dorm + "'s percentage of respondents with work-life balance";});
+        
+        scatterplot();
+    
 });
+    
+    
+function scatterplot() {
+    
+    //SCATTER PLOT
+    var widthInterval = 100;
+    var pointHeight = 500;
 
+    var scaleFunction2 = d3.scale.linear().domain([0, 100]).range([0, pointHeight]);
+    
+        var chart2 = d3.select('#d3chart2')
+                       .attr("width", ((widthInterval * mitPressureSurvey.length) + 50))
+                       .attr("height", pointHeight);
+    
+       var binding2 = chart2.selectAll("g").data(mitPressureSurvey);
+    
+       var bar2 = binding2.enter()
+                          .append("g")
+                          .attr("transform", function(d, i){
+                              return "translate(" + (i*widthInterval) + ", 0)";
+                           })
+       
+       //happier than average points
+       bar2.append("circle")
+               .attr("cx", widthInterval)
+               .attr("cy", function(d) {
+               return scaleFunction2(d.happierThanAvg);
+               })
+              .attr("r", 4)
+              .style("fill", "steelblue");
+    
+       //extroverted points
+       bar2.append("circle")
+               .attr("cx", widthInterval)
+               .attr("cy", function(d) {
+               return scaleFunction2(d.extroverted);
+               })
+              .attr("r", 4)
+              .style("fill", "pink");
+       
+       //work life balance points
+       bar2.append("circle")
+               .attr("cx", widthInterval)
+               .attr("cy", function(d) {
+               return scaleFunction2(d.workLifeBalance);
+               })
+              .attr("r", 4)
+              .style("fill", "green");
+    
+    
+    //need some space between labels and where axes cross
+    var listDorms= ["  "];
+    
+    //create array of all dorm names to label x-axis
+    for (var i = 0; i < mitPressureSurvey.length; i++){
+        listDorms[i+1] = mitPressureSurvey[i].dorm;
+    }
+    
+    // make x axis scale: domain is tick labels, range is actual length of axis
+    var xScale = d3.scale.ordinal()
+              .domain(listDorms)
+              .rangePoints([0, widthInterval*mitPressureSurvey.length]);
+    
+    //create x axis with labels at bottom of axis
+    var xAxis = d3.svg.axis()
+                   .scale(xScale)
+                   .orient("bottom");
+    
+    chart2.append("g")
+         .attr("class", "axis")     
+         .call(xAxis);
+    
+    // make y axis scale: domain is tick labels, range is actual length of axis
+    var yScale = d3.scale.linear()
+                      .domain([0, 100])
+                      .range([0, pointHeight]);
+    
+    //create y axis with labels at bottom of axis            
+    var yAxis = d3.svg.axis()
+                  .scale(yScale)
+                  .ticks(11)
+                  .orient("right");
+     
+    chart2.append("g")
+         .attr("class", "axis")     
+         .call(yAxis);
+          
+    };
+    
+ 
 </script>
 </head>
 
@@ -71,7 +237,18 @@ $(function() {
 
 <h1>MIT pressure survey visualization</h1>
 
-<svg class="chart" id="d3chart"></svg>
+<div><svg class="chart" id="d3chart"></svg></div>
+<div><svg class="chart" id="d3chart2"></svg></div>
+    
+<div id="happy">
+Percentage of respondents happier than average.
+</div>
+<div id="extrovert">
+Percentage of respondents who are extroverted.
+</div>
+<div id="balance">
+Percentage of respondents with work-life balance.
+</div>
 
 </body>
 </html>

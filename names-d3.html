@@ -25,7 +25,34 @@ var students = [
 
 // jQuery magic to run this code after your page loads
 $(function() {
-  // insert your code here
+    /*
+  for (var i = 0; i < students.length; i++){
+      var s = students[i];
+      var len = s.length;
+      console.log(s,len);
+      $('#studentRoster').append('<div style= "font-size: ' + len*2 + 'px;" >' + s + '</div>');
+  }*/
+    
+    var root = d3.select('#studentRoster');
+    
+    /* in future, will have lots of divs in root. want to bind each element of students to one of these divs.. one-to-one DOM to DATA */
+    var binding = root.selectAll("div").data(students);
+    
+    /* chaining syntax (line up dots) */
+    /* enter() means that you do the following things whenever you see new data.. runs for loop for you */
+    /* anonymous functions get called with each data element (in this case, the array) */
+    /* style() sets CSS properties */
+    binding.enter()
+           .append('div')
+           .text(function(d) {
+               var parts = d.split(',');
+               return parts[1] + " " + parts[0];               
+            })
+           .style('font-size', function(d) {
+           return (d.length*2) + 'px'
+           })
+  
+    
 });
 
 </script>
