@@ -16,19 +16,28 @@
 .axis line {
      fill: none;
      stroke: black;
-     shape-rendering: crispEdges};
+     shape-rendering: crispEdges;
+}
     
-#happy {
-  color: blue;
+    
+#scatterLegend {
+  border-style: double ;
+  border-width: 5px;
+  width: 350px;
 }
     
 #extrovert {
   color: pink;
 }
     
+#happiest {
+  color: steelblue;
+}
+    
 #balance {
   color: green;
 }
+  
 
 </style>
 
@@ -240,7 +249,8 @@ function scatterplot() {
 <div><svg class="chart" id="d3chart"></svg></div>
 <div><svg class="chart" id="d3chart2"></svg></div>
     
-<div id="happy">
+<div id="scatterLegend" >
+<div id="happiest">
 Percentage of respondents happier than average.
 </div>
 <div id="extrovert">
@@ -248,6 +258,7 @@ Percentage of respondents who are extroverted.
 </div>
 <div id="balance">
 Percentage of respondents with work-life balance.
+</div>
 </div>
 
 </body>
